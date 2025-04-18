@@ -1,7 +1,6 @@
-import { Client, GatewayIntentBits, Partials } from "discord.js";
+import { ActivityType, Client, GatewayIntentBits, Partials } from "discord.js";
 import { token } from "./token.json";
 
-// Utwórz nowego klienta Discord
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -12,26 +11,54 @@ const client = new Client({
   partials: [Partials.Channel],
 });
 
-// Gotowość bota
 client.on("ready", () => {
   console.log(`Użyto konta ${client.user?.tag}!`);
 });
 
-// Obsługa wiadomości
 client.on("messageCreate", async (message) => {
-  // Ignoruj wiadomości od innych botów
   if (message.author.bot) return;
 
-  // Prosta komenda ping
   if (message.content.toLowerCase() === "!ping") {
     await message.reply("Pong!");
   }
 });
 
-// Obsługa błędów
 client.on("error", (error) => {
   console.error("Wystąpił błąd:", error);
 });
 
-// Zaloguj bota używając tokenu z pliku .env
+const statusMessages: string[] = [
+  "Type /help",
+  "ariaClient is the best!",
+  "ariaclient.fun",
+  "nice status bro",
+];
+
+let currentIndex = 0;
+
+updateStatus();
+
+setInterval(updateStatus, 10000);
+
+function updateStatus() {
+  if (!client.user) return;
+
+  const status = statusMessages[currentIndex];
+  if (typeof status !== "string") {
+    console.error("Invalid status message");
+    return;
+  }
+  currentIndex = (currentIndex + 1) % statusMessages.length;
+
+  client.user.setPresence({
+    activities: [
+      {
+        name: status,
+        type: ActivityType.Playing,
+      },
+    ],
+    status: "online",
+  });
+}
+
 client.login(token);

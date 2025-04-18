@@ -10,7 +10,8 @@
     "dev": "bun run --watch index.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/node": "^22.14.1"
   },
   "peerDependencies": {
     "typescript": "^5"
