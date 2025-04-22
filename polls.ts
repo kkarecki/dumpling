@@ -1,9 +1,4 @@
-import {
-  Message,
-  EmbedBuilder,
-  PermissionsBitField,
-  TextChannel,
-} from "discord.js";
+import { Message, EmbedBuilder, PermissionsBitField, TextChannel } from 'discord.js';
 
 const pollEmojis = [
   "❤️",
@@ -19,92 +14,102 @@ const pollEmojis = [
   "🤍",
 ];
 
-/**
-  @param message 
- */
+function cleanQuotes(text: string): string {
+  if ((text.startsWith('"') && text.endsWith('"')) || (text.startsWith("'") && text.endsWith("'"))) {
+      return text.slice(1, -1);
+  }
+  return text;
+}
+
 export async function handlePollCommand(message: Message): Promise<void> {
   if (!message.guild || !message.member) {
-    await message.reply("This command can only be used on a server.");
-    return;
+      await message.reply('This command can only be used on a server.');
+      return;
   }
 
-  if (
-    !message.member.permissions.has(PermissionsBitField.Flags.Administrator)
-  ) {
-    await message.reply(
-      "You don’t have administrator permissions to use this command."
-    );
-    return;
+  if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+      await message.reply('You do not have administrator permissions to use this command.');
+      return;
   }
 
-  const args = message.content.match(/("[^"]+"|'[^']+'|\S+)/g) || [];
-  args.shift();
+  const rawArgs = message.content.match(/("[^"]+"|'[^']+'|\S+)/g) || [];
+  rawArgs.shift();
 
-  const cleanedArgs = args.map((arg) =>
-    (arg.startsWith('"') && arg.endsWith('"')) ||
-    (arg.startsWith("'") && arg.endsWith("'"))
-      ? arg.slice(1, -1)
-      : arg
-  );
-
-  if (cleanedArgs.length < 3) {
-    await message.reply(
-      'Usage: !poll "Question" "Option1" "Option2" [Optional_Options...] `'
-    );
-    return;
+  if (rawArgs.length === 0) {
+      await message.reply('Missing question and options. Usage: `!poll <question or "quoted question"> <"option 1"> ["option 2" ...] or <option1> [option2 ...]`');
+      return;
   }
 
-  const question = cleanedArgs[0];
-  const options = cleanedArgs.slice(1);
+  let question: string;
+  let optionsRaw: string[];
+
+  const firstQuotedIndex = rawArgs.findIndex(arg => arg.startsWith('"') || arg.startsWith("'"));
+
+  if (firstQuotedIndex === 0) {
+      question = cleanQuotes(rawArgs[0]!);
+      optionsRaw = rawArgs.slice(1);
+  } else if (firstQuotedIndex > 0) {
+      question = rawArgs.slice(0, firstQuotedIndex).join(' ');
+      optionsRaw = rawArgs.slice(firstQuotedIndex);
+  } else {
+      question = rawArgs[0]!;
+      optionsRaw = rawArgs.slice(1);
+      if (rawArgs[0] && rawArgs[0].includes(' ') && !rawArgs[0].match(/^["'].*["']$/)) {
+           console.warn(`Question "${question}" was not quoted and contains spaces. Interpretation might be ambiguous.`);
+      }
+  }
+
+  const options = optionsRaw.map(cleanQuotes);
+
+  if (options.length < 2) {
+      await message.reply('A poll must have at least two options.');
+      return;
+  }
 
   if (options.length > pollEmojis.length) {
-    await message.reply(
-      `The maximum number of options in a poll is ${pollEmojis.length}.`
-    );
-    return;
+      await message.reply(`The maximum number of options for a poll is ${pollEmojis.length}.`);
+      return;
   }
 
-  let pollDescription = `**${question}**\n\n`;
+  let pollDescription = `**Question**\n**${question}**\n\n**Choice**\n`;
   options.forEach((option, index) => {
-    pollDescription += `${pollEmojis[index]} ${option}\n`;
+      pollDescription += `${option} - ${pollEmojis[index]} \n`;
   });
 
   const embed = new EmbedBuilder()
-    .setColor("#7105ed")
-    .setTitle("React to vote in the poll.")
+    .setColor(`#7105ed`)
+    .setTitle('📊 Poll')
     .setDescription(pollDescription)
-    .setFooter({ text: `Author ${message.author.tag}` });
+    .setTimestamp()
+    .setFooter({
+        text: `Poll created by ${message.author.tag}`,
+        iconURL: message.author.displayAvatarURL()
+     });
 
   try {
-    if (!(message.channel instanceof TextChannel)) {
-      await message.reply(
-        "This type of channel does not support sending surveys."
-      );
-      return;
-    }
+      if (!(message.channel instanceof TextChannel)) {
+          await message.reply('Cannot send a poll in this channel type.');
+          return;
+      }
 
-    const pollMessage = await message.channel.send({ embeds: [embed] });
-    console.log(
-      `A poll has been created (ID: pollMessage.id) in channel ∗∗pollMessage.id)in channel ∗∗{message.channel.name}** by ${message.author.tag}.`
-    );
+      const pollMessage = await message.channel.send({
+          content: '@everyone',
+          embeds: [embed]
+      });
+      // --------------------------
 
-    for (let i = 0; i < options.length; i++) {
-      await pollMessage.react(pollEmojis[i]!);
-    }
+      console.log(`Created poll (ID: ${pollMessage.id}) in channel ${message.channel.name} by ${message.author.tag}`);
 
-    if (message.deletable) {
-      await message
-        .delete()
-        .catch((err) =>
-          console.error("Unable to remove the !poll message.", err)
-        );
-    }
+      for (let i = 0; i < options.length; i++) {
+          await pollMessage.react(pollEmojis[i]!);
+      }
+
+      if (message.deletable) {
+          await message.delete().catch(err => console.error("Failed to delete the !poll message:", err));
+      }
+
   } catch (error) {
-    console.error("Error creating poll:", error);
-    await message
-      .reply(
-        "An error occurred while creating the poll. Please check the bots permissions (send messages, add reactions, embed links)."
-      )
-      .catch(console.error);
+      console.error('Error whilst creating poll:', error);
+      await message.reply('An error occurred whilst creating the poll. Please check the bot\'s permissions.').catch(console.error);
   }
 }
