@@ -110,19 +110,20 @@ export async function initializeReactionRole() {
       .catch((err) => {
         console.error(err);
 
-        console.error(`Błąd pobierania wiadomości: ${err}`);
+        console.error(`Message retrieval error: ${err}`);
         return null;
       });
 
     if (!message) {
-      console.error(`Wiadomość ${config.targetMessageId} nie istnieje!`);
+      console.error(`Message ${config.targetMessageId} doesn't exist!`);
       return;
     }
 
     await message.react(config.reactionEmoji);
   } catch (error) {
-    console.error("❌ Krytyczny błąd:", error);
+    console.error("Critical error:", error);
   }
 }
+
 
 export { Client };
