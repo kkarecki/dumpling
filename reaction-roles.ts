@@ -91,7 +91,7 @@ export async function handleReactionAdd(
 
 export async function initializeReactionRole() {
   if (!client.user) {
-    console.error("Bot nie jest gotowy!");
+    console.error("The bot isn't ready yet. Please wait.");
     return;
   }
 
@@ -101,7 +101,7 @@ export async function initializeReactionRole() {
     );
 
     if (!channel || !channel.isTextBased()) {
-      console.error("Nie znaleziono odpowiedniego kanału!");
+      console.error("Couldn't find an appropriate channel");
       return;
     }
 

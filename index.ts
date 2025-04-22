@@ -61,13 +61,11 @@ client.on(Events.MessageCreate, async (message) => {
   if (message.content.toLowerCase().startsWith('!poll')) {
       console.log(`Detected potential !poll command from ${message.author.tag}`);
 
-      await handlePollCommand(message).catch(error => {
-          console.error("Unhandled error in handlePollCommand:", error);
-    
-          message.reply("An unexpected error occurred while processing the poll command.").catch(console.error);
-      });
-      
-      return;
+      await handlePollCommand(client, message).catch(error => {
+            console.error("Unhandled error in handlePollCommand:", error);
+            message.reply("An unexpected error occurred whilst processing the poll command.").catch(console.error);
+        });
+        return;
   }
 });
 
