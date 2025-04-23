@@ -7,10 +7,6 @@ import os from 'os';
 import process from 'process';
 import config from "./config.json";
 
-const BOT_VERSION = "1.0.0";
-const BOT_AUTHOR_GH = "kkarecki";
-const BOT_AUTHOR_ID = "1138434528441016390";
-
 function formatUptime(readyTimestamp: number | null): string {
     if (!readyTimestamp) return 'N/A';
     const uptimeMs = Date.now() - readyTimestamp;
