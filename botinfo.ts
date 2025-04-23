@@ -1,27 +1,25 @@
-// bun add systeminformation
-// bun add -D @types/systeminformation
+// bun i
+// bun upgrade
 
 import {
+  DMChannel,
   EmbedBuilder,
   Message,
-  TextChannel,
-  DMChannel,
   NewsChannel,
+  TextChannel,
   ThreadChannel,
 } from "discord.js";
 import si from "systeminformation";
-import os from "os";
-import process from "process";
 import config from "./config.json";
 
 function formatUptime(readyTimestamp: number | null): string {
   if (!readyTimestamp) return "N/A";
-  const uptimeMs = Date.now() - readyTimestamp;
-  const secondsTotal = Math.floor(uptimeMs / 1000);
-  const days = Math.floor(secondsTotal / 86400);
-  const hours = Math.floor((secondsTotal % 86400) / 3600);
-  const minutes = Math.floor((secondsTotal % 3600) / 60);
-  const seconds = Math.floor(secondsTotal % 60);
+  const uptimeMs: number = Date.now() - readyTimestamp;
+  const secondsTotal: number = Math.floor(uptimeMs / 1000);
+  const days: number = Math.floor(secondsTotal / 86400);
+  const hours: number = Math.floor((secondsTotal % 86400) / 3600);
+  const minutes: number = Math.floor((secondsTotal % 3600) / 60);
+  const seconds: number = Math.floor(secondsTotal % 60);
 
   let uptimeStr = "";
   if (days > 0) uptimeStr += `${days}d `;
@@ -32,15 +30,15 @@ function formatUptime(readyTimestamp: number | null): string {
 }
 
 function createProgressBar(percentage: number, length: number = 10): string {
-  const filledBlocks = Math.round((percentage / 100) * length);
-  const emptyBlocks = length - filledBlocks;
-  const filledStr = "|".repeat(filledBlocks);
-  const emptyStr = " ".repeat(emptyBlocks);
+  const filledBlocks: number = Math.round((percentage / 100) * length);
+  const emptyBlocks: number = length - filledBlocks;
+  const filledStr: string = "|".repeat(filledBlocks);
+  const emptyStr: string = " ".repeat(emptyBlocks);
   return `[${filledStr}${emptyStr}]`;
 }
 
-function formatBytesToGB(bytes: number): string {
-  if (bytes === 0) return "0 GB";
+function formatBytesToGiB(bytes: number): string {
+  if (bytes === 0) return "0 GiB";
   return (bytes / (1024 * 1024 * 1024)).toFixed(0);
 }
 
@@ -73,16 +71,16 @@ export async function handleBotInfoCommand(message: Message): Promise<void> {
     ]);
 
     const cpuLoad = cpuData.currentLoad.toFixed(0);
-    const ramUsed = formatBytesToGB(memData.used);
-    const ramTotal = formatBytesToGB(memData.total);
+    const ramUsed = formatBytesToGiB(memData.used);
+    const ramTotal = formatBytesToGiB(memData.total);
     const ramPercent = ((memData.used / memData.total) * 100).toFixed(0);
     const mainFs = fsData.find((fs) => fs.mount === "/") || fsData[0];
     let diskUsed = "N/A";
     let diskTotal = "N/A";
     let diskPercent = "0";
     if (mainFs) {
-      diskUsed = formatBytesToGB(mainFs.used);
-      diskTotal = formatBytesToGB(mainFs.size);
+      diskUsed = formatBytesToGiB(mainFs.used);
+      diskTotal = formatBytesToGiB(mainFs.size);
       diskPercent = mainFs.use.toFixed(0);
     }
     const bunVersion = Bun.version;
@@ -126,8 +124,8 @@ export async function handleBotInfoCommand(message: Message): Promise<void> {
           value:
             "```" +
             `${cpuBar} ${cpuLoad}%   CPU\n` +
-            `${ramBar} ${ramPercent}%   RAM ${ramUsed} GB/${ramTotal} GB\n` +
-            `${diskBar} ${diskPercent}%   Disk ${diskUsed} GB/${diskTotal} GB` +
+            `${ramBar} ${ramPercent}%   RAM ${ramUsed} GiB/${ramTotal} GiB\n` +
+            `${diskBar} ${diskPercent}%   Disk ${diskUsed} GiB/${diskTotal} GiB` +
             "```",
           inline: false,
         }

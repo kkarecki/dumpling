@@ -4,7 +4,6 @@ import {
   type PartialUser,
   type PartialMessageReaction,
   Client,
-  TextChannel,
 } from "discord.js";
 import config from "./config.json";
 
@@ -124,6 +123,5 @@ export async function initializeReactionRole() {
     console.error("Critical error:", error);
   }
 }
-
 
 export { Client };
