@@ -122,7 +122,7 @@ export async function handleBotInfoCommand(message: Message): Promise<void> {
         {
           name: "💻 Resource Usage",
           value:
-            "```" +
+            "```yml\n" +
             `${cpuBar} ${cpuLoad}%   CPU\n` +
             `${ramBar} ${ramPercent}%   RAM ${ramUsed} GiB/${ramTotal} GiB\n` +
             `${diskBar} ${diskPercent}%   Disk ${diskUsed} GiB/${diskTotal} GiB` +
