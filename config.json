@@ -1,4 +1,7 @@
 {
+  "botVersion": "1.0.0",
+  "botAuthorGh": "kkarecki",
+  "botAuthorId": "1138434528441016390",
   "reactionEmoji": "ariaclient:1362932558395871433",
   "roleIds": {
     "member": "1361838938645467286",

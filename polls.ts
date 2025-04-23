@@ -79,7 +79,7 @@ export async function handlePollCommand(client: Client, message: Message): Promi
       question = rawArgs[0]!;
       optionsRaw = rawArgs.slice(1);
       if (rawArgs[0] && rawArgs[0].includes(' ') && !rawArgs[0].match(/^["'].*["']$/)) {
-           console.warn(`[Poll Command] Question "${question}" was not quoted and contains spaces. Interpretation might be ambiguous.`);
+           console.warn(`Question "${question}" was not quoted and contains spaces. Interpretation might be ambiguous.`);
       }
   }
 
@@ -134,7 +134,7 @@ export async function handlePollCommand(client: Client, message: Message): Promi
           content: durationStr ? '@everyone' : undefined,
           embeds: [embed]
       });
-      console.log(`[Poll Command] Created poll (ID: ${pollMessage.id}) in channel ${message.channel.name} by ${message.author.tag}`);
+      console.log(`Created poll (ID: ${pollMessage.id}) in channel ${message.channel.name} by ${message.author.tag}`);
 
       for (let i = 0; i < options.length; i++) {
           await pollMessage.react(pollEmojis[i]!);

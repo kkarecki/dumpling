@@ -18,6 +18,7 @@ import {
 } from "./reaction-roles"; 
 import { handlePollCommand } from "./polls";
 import { initializePolls, handlePollVote } from './pollManager';
+import { handleBotInfoCommand } from "./botinfo";
 import { token } from "./token.json";
 import config from "./config.json";
 
@@ -44,6 +45,7 @@ client.on(Events.MessageCreate, async (message) => {
 
   if (message.guild && message.content.startsWith('!')) {
       const command = message.content.toLowerCase().split(' ')[0];
+      
 
       if (command === '!poll') {
           console.log(`Detected potential !poll command from ${message.author.tag}`);
@@ -53,6 +55,15 @@ client.on(Events.MessageCreate, async (message) => {
           });
           return; 
       }
+
+      else if (command === '!bot') {
+        console.log(`[MessageCreate] Detected !bot command from ${message.author.tag}`);
+        await handleBotInfoCommand(message).catch(error => {
+            console.error("Unhandled error in handleBotInfoCommand:", error);
+            message.reply("An unexpected error occurred whilst fetching bot info.").catch(console.error);
+        });
+        return; 
+    }
 
       else if (command === '!help') {
           try {
