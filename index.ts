@@ -43,10 +43,10 @@ client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
 
   if (message.guild && message.content.startsWith('!')) {
-      const command = message.content.toLowerCase().split(' ')[0]; // Get the command part like "!poll"
+      const command = message.content.toLowerCase().split(' ')[0];
 
       if (command === '!poll') {
-          console.log(`[MessageCreate] Detected potential !poll command from ${message.author.tag}`);
+          console.log(`Detected potential !poll command from ${message.author.tag}`);
           await handlePollCommand(client, message).catch(error => {
               console.error("Unhandled error in handlePollCommand:", error);
               message.reply("An unexpected error occurred whilst processing the poll command.").catch(console.error);
@@ -56,11 +56,46 @@ client.on(Events.MessageCreate, async (message) => {
 
       else if (command === '!help') {
           try {
-              const embed = new EmbedBuilder()
-                  .setTitle(`Help Page`)
-                  .setColor(`#7105ed`)
-                  .setDescription(`**!client** - Sends a download link and minimum requirements.\n\n**Admin Commands**\n**!poll** [duration] <question> <option1> [option2...] - Creates a poll. Duration (e.g., 1h30m) is optional.`) // Updated poll usage
-                  .setThumbnail(`https://cdn.discordapp.com/attachments/1362925824096997598/1362925860339978370/WhiteGlow.png?ex=6806255f&is=6804d3df&hm=dac68dad312bf2ab96e02d4bcd0779cbbdec06e298b46c10743e6a1443d8df38&`);
+            const originalThumbnail = `https://cdn.discordapp.com/attachments/1362925824096997598/1362925860339978370/WhiteGlow.png?ex=6806255f&is=6804d3df&hm=dac68dad312bf2ab96e02d4bcd0779cbbdec06e298b46c10743e6a1443d8df38&`;
+
+            const embed = new EmbedBuilder()
+    .setColor(`#7105ed`)
+    .setTitle('ℹ️ Bot Commands Help')
+    .setThumbnail(originalThumbnail)
+    .setDescription('Here’s a list of available commands, separated by access level:')
+    .addFields(
+        {
+            name: '👤 User Commands',
+            value: '\u200B' 
+        },
+        {
+            name: '🖥️ !client',
+            value: 'Sends the download link and minimum requirements for ariaClient.',
+            inline: false 
+        },
+        {
+            name: '\u200B',
+            value: '\u200B'
+        },
+        {
+            name: '🛡️ Admin Commands',
+            value: '\u200B'
+        },
+        {
+            name: '📊 !poll',
+            value: 'Creates a poll in the current channel.\n\n' +
+                   '**Syntax:**\n`!poll [duration] <question> <option1> [option2...]`\n\n' +
+                   '• **[duration]** (Optional): Set a time limit (e.g., `30s`, `10m`, `1h`, `1d`).\n' +
+                   '• **<question>**: The question to ask.\n' +
+                   '• **<option1> [option2...]**: At least two poll options, separated by spaces.\n\n' +
+                   '**Example:**\n`!poll 1h Favourite season? Summer Autumn Winter Spring`',
+            inline: false
+        }
+    )
+    .setTimestamp()
+    .setFooter({ text: `Command Help Information`, iconURL: originalThumbnail });
+
+            
 
               await message.channel.send({ embeds: [embed] });
 
@@ -69,23 +104,43 @@ client.on(Events.MessageCreate, async (message) => {
               }
           } catch (error) {
               console.error("Failed to send the help embed message: ", error);
-              await message.reply("An error occurred whilst generating help information.").catch(console.error); // Adjusted error message
+              await message.reply("An error occurred whilst generating help information.").catch(console.error);
           }
           return;
       }
 
       else if (command === '!client') {
           try {
-              const embed = new EmbedBuilder()
-                  .setTitle(`Client requirements and download link`)
-                  .setColor(`#7105ed`)
-                  .setDescription(`**ariaClient**\n[Download](https://sesame.ariaclient.fun/download/client/latest)\n\nWindows Defender and SmartScreen may detect the software as a threat. In such a case, we recommend temporarily disabling real-time protection.\n‎\n**Requirements**`)
-                  .addFields(
-                      { name: 'Minimum hardware', value: '4GB RAM\n4-thread CPU\nSSD storage', inline: true },
-                      { name: 'Operating system', value: 'Windows 10 21H2 - 10.0.19044\nWindows 10 22H2 - 10.0.19045\nWindows 11 23H2 - 10.0.22631\nWindows 11 24H2 - 10.0.26100\n(requires 64-bit)', inline: true },
-                      { name: 'Other', value: 'MS account with MC licence, logged into the MS Store', inline: false },
-                  )
-                  .setThumbnail(`https://cdn.discordapp.com/attachments/1362925824096997598/1362925860339978370/WhiteGlow.png?ex=6806255f&is=6804d3df&hm=dac68dad312bf2ab96e02d4bcd0779cbbdec06e298b46c10743e6a1443d8df38&`);
+            const thumbnailUrl = `https://cdn.discordapp.com/attachments/1362925824096997598/1362925860339978370/WhiteGlow.png?ex=6806255f&is=6804d3df&hm=dac68dad312bf2ab96e02d4bcd0779cbbdec06e298b46c10743e6a1443d8df38&`;
+
+            const embed = new EmbedBuilder()
+                .setTitle(`📊 Client requirements and download link`)
+                .setColor(`#7105ed`)
+                .setDescription(
+                    `⬇️ **ariaClient**\n[Download](https://sesame.ariaclient.fun/download/client/latest)\n\n` +
+                    `⚠️ Windows Defender and SmartScreen may detect the software as a threat. In such a case, we recommend temporarily disabling real-time protection.\n\n` + 
+                    `📋 **Requirements**` 
+                )
+                .addFields(
+                    {
+                        name: '⚙️ Minimum hardware',
+                        value: '• 4GB RAM\n• 4-thread CPU\n• SSD storage',
+                        inline: true
+                    },
+                    {
+                        name: '🪟 Operating system',
+                        value: '• Windows 10 21H2 (19044)\n• Windows 10 22H2 (19045)\n• Windows 11 23H2 (22631)\n• Windows 11 24H2 (26100)\n*Requires 64-bit*',
+                        inline: true
+                    },
+                    {
+                        name: '🔑 Other',
+                        value: '• MS account with MC licence\n• Logged into the MS Store',
+                        inline: false
+                    }
+                )
+                .setThumbnail(thumbnailUrl)
+                .setTimestamp()
+                .setFooter({ text: 'ariaClient Information', iconURL: thumbnailUrl });
 
               await message.channel.send({ embeds: [embed] });
 
@@ -94,7 +149,7 @@ client.on(Events.MessageCreate, async (message) => {
               }
           } catch (error) {
               console.error("Failed to send the client embed message: ", error);
-              await message.reply("An error occurred whilst generating client information.").catch(console.error); // Adjusted error message
+              await message.reply("An error occurred whilst generating client information.").catch(console.error);
           }
           return;
       }
