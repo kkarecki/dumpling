@@ -34,7 +34,7 @@ async function readActivePolls(): Promise<Record<string, ActivePoll>> {
         if (error.code === 'ENOENT') {
             return {};
         }
-        console.error("[PollManager] Error reading active polls file:", error);
+        console.error("Error reading active polls file:", error);
         return {};
     }
 }
@@ -43,12 +43,12 @@ async function writeActivePolls(polls: Record<string, ActivePoll>): Promise<void
     try {
         await fs.writeFile(ACTIVE_POLLS_FILE, JSON.stringify(polls, null, 2));
     } catch (error) {
-        console.error("[PollManager] Error writing active polls file:", error);
+        console.error("Error writing active polls file:", error);
     }
 }
 
 export async function announceResults(client: Client, messageId: string): Promise<void> {
-    console.log(`[PollManager] Announcing results for poll: ${messageId}`);
+    console.log(`Announcing results for poll: ${messageId}`);
     const polls = await readActivePolls();
     const pollData = polls[messageId];
 
@@ -59,14 +59,14 @@ export async function announceResults(client: Client, messageId: string): Promis
     }
 
     if (!pollData) {
-        console.warn(`[PollManager] Poll data not found for messageId ${messageId} when trying to announce results.`);
+        console.warn(`Poll data not found for messageId ${messageId} when trying to announce results.`);
         return;
     }
 
     try {
         const channel = await client.channels.fetch(pollData.channelId);
         if (!channel || !(channel instanceof TextChannel)) {
-            console.error(`[PollManager] Channel ${pollData.channelId} not found or not a TextChannel.`);
+            console.error(`Channel ${pollData.channelId} not found or not a TextChannel.`);
             delete polls[messageId];
             await writeActivePolls(polls);
             return;
@@ -74,10 +74,10 @@ export async function announceResults(client: Client, messageId: string): Promis
 
         const message = await channel.messages.fetch(pollData.messageId).catch(() => null);
         if (!message) {
-            console.warn(`[PollManager] Poll message ${pollData.messageId} not found in channel ${pollData.channelId}.`);
+            console.warn(`Poll message ${pollData.messageId} not found in channel ${pollData.channelId}.`);
             delete polls[messageId];
             await writeActivePolls(polls);
-            channel.send(`[PollManager] Poll message for "${pollData.question}" was not found (maybe deleted?). Cannot announce results.`).catch(console.error);
+            channel.send(`Poll message for "${pollData.question}" was not found (maybe deleted?). Cannot announce results.`).catch(console.error);
             return;
         }
 
@@ -123,11 +123,11 @@ export async function announceResults(client: Client, messageId: string): Promis
 
 
     } catch (error) {
-        console.error(`[PollManager] Error announcing results for poll ${messageId}:`, error);
+        console.error(`Error announcing results for poll ${messageId}:`, error);
     } finally {
         delete polls[messageId];
         await writeActivePolls(polls);
-        console.log(`[PollManager] Removed poll ${messageId} from active polls.`);
+        console.log(`Removed poll ${messageId} from active polls.`);
     }
 }
 
@@ -139,7 +139,7 @@ export async function schedulePollEnd(client: Client, pollInfo: ActivePoll): Pro
 
     const durationMs = pollInfo.endTime - Date.now();
     if (durationMs <= 0) {
-        console.warn(`[PollManager] Poll ${pollInfo.messageId} scheduled with non-positive duration. Announcing immediately.`);
+        console.warn(`Poll ${pollInfo.messageId} scheduled with non-positive duration. Announcing immediately.`);
         await announceResults(client, pollInfo.messageId);
         return;
     }
@@ -149,10 +149,10 @@ export async function schedulePollEnd(client: Client, pollInfo: ActivePoll): Pro
         clearTimeout(existingTimeout);
     }
 
-    console.log(`[PollManager] Scheduling poll ${pollInfo.messageId} to end in ${formatDuration(durationMs)}`);
+    console.log(`Scheduling poll ${pollInfo.messageId} to end in ${formatDuration(durationMs)}`);
     const timeoutId = setTimeout(() => {
         announceResults(client, pollInfo.messageId)
-            .catch(err => console.error(`[PollManager] Error in scheduled announceResults for ${pollInfo.messageId}:`, err));
+            .catch(err => console.error(`Error in scheduled announceResults for ${pollInfo.messageId}:`, err));
         pollTimeouts.delete(pollInfo.messageId);
     }, durationMs);
 
@@ -160,7 +160,7 @@ export async function schedulePollEnd(client: Client, pollInfo: ActivePoll): Pro
 }
 
 export async function initializePolls(client: Client): Promise<void> {
-    console.log("[PollManager] Initializing polls...");
+    console.log("Initializing polls...");
     const polls = await readActivePolls();
     const now = Date.now();
     let rescheduledCount = 0;
@@ -171,21 +171,21 @@ export async function initializePolls(client: Client): Promise<void> {
         const remainingTime = poll.endTime - now;
 
         if (remainingTime <= 0) {
-            console.log(`[PollManager] Poll ${messageId} has expired. Announcing results.`);
+            console.log(`Poll ${messageId} has expired. Announcing results.`);
             await announceResults(client, messageId);
             announcedCount++;
         } else {
-            console.log(`[PollManager] Rescheduling poll ${messageId} to end in ${formatDuration(remainingTime)}`);
+            console.log(`Rescheduling poll ${messageId} to end in ${formatDuration(remainingTime)}`);
             const timeoutId = setTimeout(() => {
                 announceResults(client, messageId)
-                    .catch(err => console.error(`[PollManager] Error in rescheduled announceResults for ${messageId}:`, err));
+                    .catch(err => console.error(`Error in rescheduled announceResults for ${messageId}:`, err));
                 pollTimeouts.delete(messageId);
             }, remainingTime);
             pollTimeouts.set(messageId, timeoutId);
             rescheduledCount++;
         }
     }
-     console.log(`[PollManager] Initialization complete. Rescheduled ${rescheduledCount} polls, announced results for ${announcedCount} expired polls.`);
+     console.log(`Initialization complete. Rescheduled ${rescheduledCount} polls, announced results for ${announcedCount} expired polls.`);
 }
 
 export async function handlePollVote(reaction: MessageReaction, user: User): Promise<void> {
